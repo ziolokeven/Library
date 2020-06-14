@@ -1,0 +1,67 @@
+body, html {
+    width: 100%;
+    height: 100%;
+}
+
+.card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    width: 275px;
+    margin: 20px;
+    text-align: center;
+    display: inline-block;
+}
+
+.cardInfo {
+
+}
+
+.img-thumbnail {
+    width: 100%;
+    height: 19vw;
+    object-fit: cover;
+}
+
+.title {
+    color: grey;
+    font-size: 14px;
+}
+
+.titleContainer {
+    margin-top: 10px;
+}
+
+div.books-counter {
+    padding-right: 5px;
+    text-decoration: none;
+    color: #FFF;
+    background-color:rgb( 0,123,255);
+    margin-left : 20px;
+}
+
+footer {
+    background-color:rgb( 0,123,255);
+    color: white;
+    position: relative;
+    bottom: 0px;
+    height: 40px;
+    width: 100%;
+}
+
+.input-group{
+    margin-left: auto;
+    width:10%;
+}
+
+.searchspan{
+    width:20%;
+}
+
+.searchspanbutton{
+    margin-left:1%;
+    margin-right: 15%;
+ }
+
+.books-counter{
+    position:absolute;
+    right:1%;
+}

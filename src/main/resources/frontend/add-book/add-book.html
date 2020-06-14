@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>books</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="addbookpage.css" >
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script type="text/javascript">
+        function addbookf() {
+            var addBookData = {
+                title: $("#title").val(),
+                image: $("#image").val(),
+                releasedYear: $("#releasedYear").val(),
+                quantity: $("#quantity").val(),
+            };
+            $.ajax({
+                url: 'http://127.0.0.1:8080/api/books',
+                type: 'post',
+                contentType: 'application/json',
+                body: JSON.stringify(addBookData),
+                success: function () {
+                    console.log('adding book/s ');
+                    window.location.href='../books/books.html';
+                },
+                error: function() {
+                    console.log('blad');
+                },
+                data: JSON.stringify(addBookData)
+            });
+        }
+    </script>
+
+
+</head>
+
+<body>
+<div id="login">
+    <h3 class="text-center text-white pt-5"></h3>
+    <div class="container">
+        <div id="login-row" class="row justify-content-center align-items-center">
+            <div id="login-column" class="col-md-6">
+                <div id="login-box" class="col-md-12">
+                    <form id="login-form" class="form" action="" method="post">
+                        <h3 class="text-center text-info">Dodawanie Książek</h3>
+                        <div class="form-group">
+                            <label for="title" class="text-info">Tytuł:</label><br>
+                            <input type="text" name="title" id="title" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="image" class="text-info">Obrazek:</label><br>
+                            <input type="text" name="image" id="image" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="releasedYear" class="text-info">Rok Produkcji:</label><br>
+                            <input type="text" name="releasedYear" id="releasedYear" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity" class="text-info">Liczba: </label><br>
+                            <input type="text" name="quantity" id="quantity" class="form-control">
+                        </div>
+                        <a class="form-group">
+                            <input type="button" name="addbook" class="btn btn-info btn-md" value="Dodaj książke" onclick="addbookf()">
+                        </a>
+                        <a class="form-group">
+                            <input type="button" name="back" class="btn btn-info btn-md" value="Powrót"onclick="location.href='../books/books.html';" />
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

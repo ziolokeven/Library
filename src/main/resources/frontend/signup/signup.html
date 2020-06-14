@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zarejestruj się</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="signuppage.css" >
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script type="text/javascript">
+        function signupf() {
+            var signupData = {
+                login: $("#username").val(),
+                password: $("#password").val(),
+                firstName: $("#name").val(),
+                lastName: $("#surname").val(),
+                address: $("#address").val()
+            };
+            $.ajax({
+                url: 'http://127.0.0.1:8080/api/user/register',
+                type: 'post',
+                contentType: 'application/json',
+                body: JSON.stringify(signupData),
+                success: function () {
+                    console.log('USER LOGgeD IN ');
+                    window.location.href='../books/books.html';
+                },
+                error: function() {
+                    console.log('blad');
+                },
+                data: JSON.stringify(signupData)
+            });
+        }
+    </script>
+
+</head>
+<body>
+<div id="login">
+    <h3 class="text-center text-white pt-5"></h3>
+    <div class="container">
+        <div id="login-row" class="row justify-content-center align-items-center">
+            <div id="login-column" class="col-md-6">
+                <div id="login-box" class="col-md-12">
+                    <form id="login-form" class="form" action="" method="post">
+                        <h3 class="text-center text-info">Rejestracja</h3>
+                        <div class="form-group">
+                            <label for="username" class="text-info">Login:</label><br>
+                            <input type="text" name="username" id="username" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="name" class="text-info">Imię:</label><br>
+                            <input type="text" name="name" id="name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="surname" class="text-info">Nazwisko:</label><br>
+                            <input type="text" name="surname" id="surname" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="address" class="text-info">Adres:</label><br>
+                            <input type="text" name="address" id="address" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="text-info">Hasło:</label><br>
+                            <input type="password" name="password" id="password" class="form-control">
+                        </div>
+                        <div class="form-group">
+                           <input type="button" name="signup" class="btn btn-info btn-md" value="Zarejestruj się" onclick="signupf()">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+

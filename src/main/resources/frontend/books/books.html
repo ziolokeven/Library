@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>books</title>
+
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+		<link rel="stylesheet" href="bookspage.css" >
+		<script type="text/javascript" src="https://code.jquery.com/jquery-1.10.2.js"></script>
+
+		<script type="text/javascript">
+
+			let search;
+			let currentUser = undefined;
+			// get all books
+			getAllBooks();
+
+			//get all books
+			function getAllBooks() {
+				$.get('http://127.0.0.1:8080/api/books', {}, function (data, textStatus, jqXHR) {
+					console.log('data: ', data);
+					let html = '';
+					$.each(data, function(key, value) {
+						html += '<div class="card">';
+						html += '<img src="' + (isImage(value.image) ? value.image : getPlaceholder()) + '" alt="book" style="width:100%;" class="img-thumbnail">';
+						html += '<div class="titleContainer">'
+						html += '<h5 style="font-size: 16px;">' + value.title + '</h5>';
+						html += '</div>'
+						html += '<div class="cardInfo">'
+						html += '<p class="title">Rok produkcji</p>';
+						html += '<p>' + (value.releasedYear === undefined ? "????" : value.releasedYear) + '</p>';
+						html += '<p class="title">Liczba dostępnych: </p>';
+						html += '<p>' + (value.toBorrow === undefined ? "????" : value.toBorrow) + '</p>';
+						html += '<p><button class="btn btn-info btn-md" onclick="deleteBook('+value.id+')">ID: ' + value.id + '</button></p>';
+						html += '<p><button class="btn btn-info btn-md" onclick="borrowBook('+value.id+')">Wypożycz</button></p>';
+						html += '</div>'
+						html += '</div>';
+					});
+
+					$('#books').html(html);
+				}).fail(function() {
+					$('#books').html("<div style='text-align: center; color: red;'>Mam problem z wyświetleniem danych... :/ (musisz uruchomić aplikacje za pomocą MAVEN)</div>");
+				});
+			}
+
+			// count books
+            $.get('http://127.0.0.1:8080/api/books/counter', {}, function (data, textStatus, jqXHR) {
+                console.log('books counter data: ', data);
+                $('#books-counter').html("Aktualna liczba tytułów: <b style='color: #fff;'>" + data.counter + "</b>");
+            }).fail(function() {
+                $('#books-counter').html("Aktualna liczba tytułów: <b style='color: #fff;'>ERROR :(</b>");
+            });
+
+			function deleteBook(id) {
+            	$.ajax({
+                	url: `http://127.0.0.1:8080/api/books/${id}`,
+                	type: 'delete',
+                	contentType: 'application/json',
+                	success: function () {
+                    	console.log('Book deleted: ', id);
+                    	location.reload();
+                	},
+                	error: function() {
+                    	$('#target').html("<b style='color: red;'>Coś poszło nie tak... Nie można usunąć filmu</b>");
+                    	console.log('id: ', id);
+                	}
+            	});
+        	}
+
+        	function borrowBook(id) {
+				$.ajax({
+					url: `http://127.0.0.1:8080/api//books/borrow/${id}`,
+					type: 'post',
+					contentType: 'application/json',
+					success: function () {
+						console.log('Book borrowed: ', id);
+						location.reload();
+					},
+					error: function() {
+						$('#target').html("<b style='color: red;'>Coś poszło nie tak... Nie można wypożyczyć książki</b>");
+						console.log('id: ', id);
+					}
+				});
+			}
+
+        	function showBooks(data, type) {
+				let html = '';
+
+				if(data.length === 0 && type === 0) {
+					html += "<div style='text-align: center; margin-bottom: 25px; color: black;'><p style='font-size: 18px;'>Nie znaleziono filmu o podanej nazwie.</p></div>";
+				} else if(data.length === 0 && type === 1) {
+					html += "<div style='text-align: center; margin-bottom: 25px; color: black;'><p style='font-size: 18px;'>Nie znaleziono filmu o podanej dacie premiery.</p></div>";
+				} else {
+					html += '<div><p style="font-size: 18px;">Wyszukiwana fraza "' + search + '". Znaleziono ' + data.length  + ' wynik(i) wyszukiwania.</p><div>';
+					$.each(data, function(key, value) {
+						html += '<div class="card">';
+						html += '<img src="' + (isImage(value.image) ? value.image : getPlaceholder()) + '" alt="book" style="width:100%;" class="img-thumbnail">';
+						html += '<div class="titleContainer">'
+						html += '<h5 style="font-size: 16px;">' + value.title + '</h5>';
+						html += '</div>'
+						html += '<div class="cardInfo">'
+						html += '<p class="title">Rok produkcji</p>';
+						html += '<p>' + (value.releasedYear === undefined ? "????" : value.releasedYear) + '</p>';
+						html += '<p class="title">Liczba dostępnych: </p>';
+						html += '<p>' + (value.toBorrow === undefined ? "????" : value.toBorrow) + '</p>';
+						html += '<p><button class="btn btn-info btn-md" onclick="deleteBook('+value.id+')">ID: ' + value.id + '</button></p>';
+						html += '<p><button class="btn btn-info btn-md" onclick="borrowBook('+value.id+')">Wypożycz</button></p>';
+						html += '</div>'
+						html += '</div>';
+					});
+				}
+				html += '<p><button style="margin: 5px;" class="btn back-button" onclick="getAllBooks()">Powrót do strony głównej</button>';
+
+				$('#books').html(html);
+			}
+
+			function getBooksWithTitle(title) {
+				$.get(`http://127.0.0.1:8080/api/books/title/${title}`, {}, function (data, textStatus, jqXHR) {
+					console.log('data: ', data);
+					showBooks(data, 0);
+				}).fail(function() {
+					let html = '';
+					html += "<div style='text-align: center; margin-bottom: 25px; color: black;'><p style='font-size: 18px;'>Nie znaleziono filmu o podanej nazwie.</p></div>";
+					html += "<p><button style='margin: 5px;' class='btn back-button' onclick='getAllBooks()'>Powrót do strony głównej</button>"
+					$('#books').html(html);
+				});
+			}
+
+			function getBooksWithYear(year) {
+				$.get(`http://127.0.0.1:8080/api/books/year/${year}`, {}, function (data, textStatus, jqXHR) {
+					console.log('data: ', data);
+					showBooks(data, 1);
+				}).fail(function() {
+					let html = '';
+					html += "<div style='text-align: center; margin-bottom: 25px; color: black;'><p style='font-size: 18px;'>Nie znaleziono filmu o podanej dacie premiery.</p></div>";
+					html += "<p><button style='margin: 5px;' class='btn back-button' onclick='getAllBooks()'>Powrót do strony głównej</button>"
+					$('#books').html(html);
+				});
+			}
+
+			function isImage(url) {
+            	return url.indexOf(".jpg") !== -1 || url.indexOf(".png") !== -1;
+			}
+
+			function getPlaceholder() {
+		    	return 'https://www-morganscloud-com.exactdn.com/wp-content/ewww/lazy/placeholder-250x356.png';
+			}
+
+			function onClick() {
+				let inputValue = $('#search').val();
+				search = $('#search').val();
+				let selectValue = $("#options option:selected").text();
+
+				if(selectValue === "Nazwa") {
+					getBooksWithTitle(inputValue);
+				} else {
+					getBooksWithYear(inputValue);
+				}
+
+				$('#search').attr('placeholder', 'Wprowadź nazwę filmu lub datę premiery').val('').focus().blur();
+			}
+
+			function exportBooksToFile(fileType) {
+                $.get('http://127.0.0.1:8080/api/download-' + fileType, {}, function (data, textStatus, jqXHR) {
+                }).fail(function() {
+                    alert("Błąd!!!");
+                });
+			}
+			function logoutf(){
+				$.ajax({
+					url: 'http://127.0.0.1:8080/api/user/logout',
+					type: 'post',
+					contentType: 'application/json',
+					success: function () {
+						console.log('wylogowano');
+						window.location.href='books.html';
+					},
+					error: function() {
+						console.log('blad wylogowywania');
+					}
+				});
+			}
+
+        	$(document).ready(function() {
+            	$('#add-book').click(function() {
+                	window.location.href='./add-book/add-book.html';
+            	})
+        	});
+			$(document).ready(function() {
+				$('#login').click(function() {
+					window.location.href='./login/login.html';
+				})
+			});
+			function getCurrentUser() {
+				$.get('http://127.0.0.1:8080/api/user/current', {}, function (data, textStatus, jqXHR) {
+					console.log('currentUser: ', data);
+					currentUser=data;
+					navbar(data);
+				}).fail(function() {
+					console.log("bad");
+				});
+			}
+
+			getCurrentUser();
+			function navbar(user){
+				let html = '';
+				//let user2 =getCurrentUser();
+				console.log("NAVBAR:",user);
+				if(currentUser=== undefined || currentUser==="") {
+					html += "<a href=\"books.html\" class=\"nav-item nav-link active\">Home</a>";
+					html += "<a href=\"../login/login.html\" class=\"nav-item nav-link\">Login</a>";
+					html += "<a href=\"../signup/signup.html\" class=\"nav-item nav-link\">Rejestracja</a>";
+				} else if(currentUser!== undefined && currentUser.admin === false) {
+					html += "<a href=\"books.html\" class=\"nav-item nav-link active\">Home</a>";
+					html += "<a href=\"\" class=\"nav-item nav-link \" onclick=\"logoutf()\">Wyloguj</a>";
+
+				} else {
+					html += "<a href=\"books.html\" class=\"nav-item nav-link active\">Home</a>";
+					html += "<a href=\"../add-book/add-book.html\" class=\"nav-item nav-link\">Dodaj książkę </a>";
+					html += "<a href=\"http://127.0.0.1:8080/api/download-txt\" class=\"nav-item nav-link\">Export TXT</a>";
+					html += "<a href=\"\" class=\"nav-item nav-link \" onclick=\"logoutf()\">Wyloguj</a>";
+				}
+				$('#mynavbar').html(html);
+
+			}
+		</script>
+	</head>
+
+	<body>
+	<div class="navbar1"></div>
+	<nav class="navbar navbar-expand-lg navbar navbar-dark bg-primary">
+		<img src="https://img.icons8.com/dusk/64/000000/book-shelf.png"/>
+		<a href="#"  class="navbar-brand">BIBLIOTEKSA</a>
+		<button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse2">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+		<div class="collapse navbar-collapse" id="navbarCollapse2">
+			<div class="navbar-nav" id="mynavbar">
+
+			</div>
+
+			<div class="input-group" style="margin-right: 4px;">
+				<select class="custom-select" id="options">
+					<option selected>Wybierz</option>
+					<option value="name" class="name">Nazwa</option>
+					<option class="year" value="year">Rok Produkcji</option>
+				</select>
+			</div>
+				<span class="searchspan">
+					<input id="search" type="text" class="form-control mr-sm-2" name="search"placeholder="Wprowadź nazwę filmu lub datę premiery">
+				</span>
+				<span class="searchspanbutton">
+					<button type="button" class="btn btn-outline-light" onclick="onClick()">Szukaj</button>
+				</span>
+				<div id="books-counter" class="books-counter"></div>
+			</form>
+		</div>
+	</nav>
+	<!-- wsywietlanie ksiazek-->
+	<div id="books" style="text-align: center">
+
+	</div>
+	<div>
+		<footer>
+			<p style="text-align: center">
+				Copyrights &copy; Rafał Zieliński | Rafał Rzeszutek | Wojciech Nowak | 2020
+			</p>
+		</footer>
+	</div>
+
+	</body>
+</html>
